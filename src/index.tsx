@@ -2,77 +2,125 @@ import {
   ButtonItem,
   PanelSection,
   PanelSectionRow,
-  Navigation,
+  TextField,
+  ToggleField,
+  SliderField,
   staticClasses
 } from "@decky/ui";
 import {
   addEventListener,
   removeEventListener,
-  callable,
   definePlugin,
-  toaster,
-  // routerHook
+  toaster
 } from "@decky/api"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaShip } from "react-icons/fa";
 
-// import logo from "../assets/logo.png";
-
-// This function calls the python function "add", which takes in two numbers and returns their sum (as a number)
-// Note the type annotations:
-//  the first one: [first: number, second: number] is for the arguments
-//  the second one: number is for the return value
-const add = callable<[first: number, second: number], number>("add");
-
-// This function calls the python function "start_timer", which takes in no arguments and returns nothing.
-// It starts a (python) timer which eventually emits the event 'timer_event'
-const startTimer = callable<[], void>("start_timer");
-
 function Content() {
-  const [result, setResult] = useState<number | undefined>();
+  const [allowAnonymous, setAllowAnonymous] = useState(false);
+  const [MQTTAddress, setMQTTAddress] = useState("127.0.0.1");
+  const [MQTTPort, setMQTTPort] = useState("1883");
+  const [username, setUsername] = useState("username");
+  const [password, setPassword] = useState("");
 
-  const onClick = async () => {
-    const result = await add(Math.random(), Math.random());
-    setResult(result);
-  };
+  const [interval, setInterval] = useState(60);
+  const [threshold, setThreshold] = useState(20);
+
+  useEffect(() => {
+    if (allowAnonymous) {
+      setUsername("username");
+      setPassword("password");
+    }
+  });
 
   return (
-    <PanelSection title="Panel Section">
+    <>
+     <PanelSection title="MQTT Configuration">
       <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={onClick}
-        >
-          {result ?? "Add two numbers via Python"}
+        <ToggleField
+          label="Allow Anonymous Connections"
+          checked={allowAnonymous}
+          onChange={setAllowAnonymous}
+        />
+      </PanelSectionRow>
+
+      <PanelSectionRow>
+        <TextField
+          label="MQTT Broker Address"
+          value={MQTTAddress}
+          onChange={(e) => setMQTTAddress(e.target.value)}
+        />
+      </PanelSectionRow>
+      
+      <PanelSectionRow>
+        <TextField
+          label="MQTT Port"
+          mustBeNumeric={true}
+          value={MQTTPort}
+          onChange={(e) => setMQTTPort(e.target.value)}
+        />
+      </PanelSectionRow>
+      
+      {!allowAnonymous && (
+        <>
+        <PanelSectionRow>
+          <TextField
+            label="MQTT Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </PanelSectionRow>
+      
+        <PanelSectionRow>
+          <TextField
+            label="MQTT Password"
+            value={password}
+            bIsPassword={true}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </PanelSectionRow>
+        </>
+      )}
+    </PanelSection>
+
+    <PanelSection title="Battery Settings">
+      <PanelSectionRow>
+        <SliderField
+          label="Low battery threshold (%)"
+          min={5}
+          max={50}
+          step={1}
+          showValue={true}
+          value={threshold}
+          onChange={setThreshold}
+        />
+      </PanelSectionRow>
+
+      <PanelSectionRow>
+        <SliderField
+          label="Update interval (seconds)"
+          min={30}
+          max={600}
+          step={10}
+          showValue={true}
+          value={interval}
+          onChange={setInterval}
+        />
+      </PanelSectionRow>
+
+      <PanelSectionRow>
+        <ButtonItem>
+          Save Settings
         </ButtonItem>
       </PanelSectionRow>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => startTimer()}
-        >
-          {"Start Python timer"}
-        </ButtonItem>
-      </PanelSectionRow>
+    </PanelSection>
 
       {/* <PanelSectionRow>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <img src={logo} />
         </div>
       </PanelSectionRow> */}
-
-      {/*<PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Navigation.Navigate("/decky-plugin-test");
-            Navigation.CloseSideMenus();
-          }}
-        >
-          Router
-        </ButtonItem>
-      </PanelSectionRow>*/}
-    </PanelSection>
+    </>
   );
 };
 

@@ -6,16 +6,17 @@ $RemoteHost = "steamdeck"
 $RemotePath = "/home/deck/homebrew/plugins/my_plugin"
 
 # --- Stap 1: Build  ---
-Write-Host "🔨 Building plugin..."
-pnpm i
+Write-Host "Building plugin..."
+pnpm install
 pnpm run build
 
 # --- Stap 2: Copy to deck ---
-Write-Host "📤 Copy all files to deck..."
+Write-Host "Copy all files to deck..."
 scp -r ./* "$($RemoteHost):$($RemotePath)/"
 
 # --- Stap 3:  ---
-Write-Host "🔄 Restart Decky plugin loader..."
-ssh $RemoteHost "sudo systemctl restart plugin_loader"
+Write-Host "Restart Decky plugin loader..."
+ssh -t $RemoteHost "sudo systemctl restart plugin_loader"
 
-Write-Host "✅ Deploy succesfull! Plugin is transfered and decky loader restarted."
+
+Write-Host "Deploy succesfull! Plugin is transfered and decky loader restarted."
