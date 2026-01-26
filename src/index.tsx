@@ -1,78 +1,67 @@
-import {
-  ButtonItem,
-  PanelSection,
-  PanelSectionRow,
-  Navigation,
-  staticClasses
+import { 
+  staticClasses,
+  ButtonItem
 } from "@decky/ui";
 import {
   addEventListener,
   removeEventListener,
-  callable,
   definePlugin,
-  toaster,
-  // routerHook
+  toaster
 } from "@decky/api"
-import { useState } from "react";
-import { FaShip } from "react-icons/fa";
-
-// import logo from "../assets/logo.png";
-
-// This function calls the python function "add", which takes in two numbers and returns their sum (as a number)
-// Note the type annotations:
-//  the first one: [first: number, second: number] is for the arguments
-//  the second one: number is for the return value
-const add = callable<[first: number, second: number], number>("add");
-
-// This function calls the python function "start_timer", which takes in no arguments and returns nothing.
-// It starts a (python) timer which eventually emits the event 'timer_event'
-const startTimer = callable<[], void>("start_timer");
+import { useEffect, useState } from "react";
+import { FaBroadcastTower } from "react-icons/fa";
+import { MQTTSettings } from "./components/settingSections/MQTTSettings";
+import { BatterySettings } from "./components/settingSections/BatterySettings";
+import { styles } from "./components/helpers/StyleHelper";
 
 function Content() {
-  const [result, setResult] = useState<number | undefined>();
+  const [allowAnonymous, setAllowAnonymous] = useState(false);
+  const [MQTTAddress, setMQTTAddress] = useState("127.0.0.1");
+  const [MQTTPort, setMQTTPort] = useState("1883");
+  const [username, setUsername] = useState("Username");
+  const [password, setPassword] = useState("Password");
 
-  const onClick = async () => {
-    const result = await add(Math.random(), Math.random());
-    setResult(result);
-  };
+  const [interval, setInterval] = useState(60);
+  const [threshold, setThreshold] = useState(20);
+
+  useEffect(() => {
+    if (allowAnonymous) {
+      setUsername("Username");
+      setPassword("Password");
+    }
+  }, [allowAnonymous]);
 
   return (
-    <PanelSection title="Panel Section">
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={onClick}
-        >
-          {result ?? "Add two numbers via Python"}
-        </ButtonItem>
-      </PanelSectionRow>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => startTimer()}
-        >
-          {"Start Python timer"}
-        </ButtonItem>
-      </PanelSectionRow>
+    <>
+      <MQTTSettings
+        allowAnonymous={allowAnonymous}
+        setAllowAnonymous={setAllowAnonymous}
+        MQTTAddress={MQTTAddress}
+        setMQTTAddress={setMQTTAddress}
+        MQTTPort={MQTTPort}
+        setMQTTPort={setMQTTPort}
+        username={username}
+        setUsername={setUsername}
+        password={password}
+        setPassword={setPassword}
+      />
 
-      {/* <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow> */}
+      <BatterySettings
+        threshold={threshold}
+        setThreshold={setThreshold}
+        interval={interval}
+        setInterval={setInterval}
+      />
 
-      {/*<PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Navigation.Navigate("/decky-plugin-test");
-            Navigation.CloseSideMenus();
-          }}
+      <div style={styles.submitButtonContainer}>
+        <ButtonItem 
+          bottomSeparator="none"
+          highlightOnFocus={false}
         >
-          Router
+          Save Settings
         </ButtonItem>
-      </PanelSectionRow>*/}
-    </PanelSection>
+      </div>
+    </>
   );
 };
 
@@ -97,14 +86,12 @@ export default definePlugin(() => {
   });
 
   return {
-    // The name shown in various decky menus
-    name: "Test Plugin",
-    // The element displayed at the top of your plugin's menu
-    titleView: <div className={staticClasses.Title}>Decky Example Plugin</div>,
+    name: "MQTT Battery Plugin",
+    titleView: <div className={staticClasses.Title}>MQTT Battery Plugin</div>,
     // The content of your plugin's menu
     content: <Content />,
     // The icon displayed in the plugin list
-    icon: <FaShip />,
+    icon: <FaBroadcastTower />,
     // The function triggered when your plugin unloads
     onDismount() {
       console.log("Unloading")
