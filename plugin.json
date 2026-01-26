@@ -1,6 +1,6 @@
 {
-  "name": "Example Plugin",
-  "author": "John Doe",
+  "name": "MQTT Battery Plugin",
+  "author": "Bataap",
   "flags": ["debug", "_root"],
   "api_version": 1,
   "publish": {

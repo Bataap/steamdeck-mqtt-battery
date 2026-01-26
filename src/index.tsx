@@ -1,11 +1,6 @@
-import {
-  ButtonItem,
-  PanelSection,
-  PanelSectionRow,
-  TextField,
-  ToggleField,
-  SliderField,
-  staticClasses
+import { 
+  staticClasses,
+  ButtonItem
 } from "@decky/ui";
 import {
   addEventListener,
@@ -14,112 +9,58 @@ import {
   toaster
 } from "@decky/api"
 import { useEffect, useState } from "react";
-import { FaShip } from "react-icons/fa";
+import { FaBroadcastTower } from "react-icons/fa";
+import { MQTTSettings } from "./components/settingSections/MQTTSettings";
+import { BatterySettings } from "./components/settingSections/BatterySettings";
+import { styles } from "./components/helpers/StyleHelper";
 
 function Content() {
   const [allowAnonymous, setAllowAnonymous] = useState(false);
   const [MQTTAddress, setMQTTAddress] = useState("127.0.0.1");
   const [MQTTPort, setMQTTPort] = useState("1883");
-  const [username, setUsername] = useState("username");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("Username");
+  const [password, setPassword] = useState("Password");
 
   const [interval, setInterval] = useState(60);
   const [threshold, setThreshold] = useState(20);
 
   useEffect(() => {
     if (allowAnonymous) {
-      setUsername("username");
-      setPassword("password");
+      setUsername("Username");
+      setPassword("Password");
     }
-  });
+  }, [allowAnonymous]);
 
   return (
     <>
-     <PanelSection title="MQTT Configuration">
-      <PanelSectionRow>
-        <ToggleField
-          label="Allow Anonymous Connections"
-          checked={allowAnonymous}
-          onChange={setAllowAnonymous}
-        />
-      </PanelSectionRow>
+      <MQTTSettings
+        allowAnonymous={allowAnonymous}
+        setAllowAnonymous={setAllowAnonymous}
+        MQTTAddress={MQTTAddress}
+        setMQTTAddress={setMQTTAddress}
+        MQTTPort={MQTTPort}
+        setMQTTPort={setMQTTPort}
+        username={username}
+        setUsername={setUsername}
+        password={password}
+        setPassword={setPassword}
+      />
 
-      <PanelSectionRow>
-        <TextField
-          label="MQTT Broker Address"
-          value={MQTTAddress}
-          onChange={(e) => setMQTTAddress(e.target.value)}
-        />
-      </PanelSectionRow>
-      
-      <PanelSectionRow>
-        <TextField
-          label="MQTT Port"
-          mustBeNumeric={true}
-          value={MQTTPort}
-          onChange={(e) => setMQTTPort(e.target.value)}
-        />
-      </PanelSectionRow>
-      
-      {!allowAnonymous && (
-        <>
-        <PanelSectionRow>
-          <TextField
-            label="MQTT Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </PanelSectionRow>
-      
-        <PanelSectionRow>
-          <TextField
-            label="MQTT Password"
-            value={password}
-            bIsPassword={true}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </PanelSectionRow>
-        </>
-      )}
-    </PanelSection>
+      <BatterySettings
+        threshold={threshold}
+        setThreshold={setThreshold}
+        interval={interval}
+        setInterval={setInterval}
+      />
 
-    <PanelSection title="Battery Settings">
-      <PanelSectionRow>
-        <SliderField
-          label="Low battery threshold (%)"
-          min={5}
-          max={50}
-          step={1}
-          showValue={true}
-          value={threshold}
-          onChange={setThreshold}
-        />
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <SliderField
-          label="Update interval (seconds)"
-          min={30}
-          max={600}
-          step={10}
-          showValue={true}
-          value={interval}
-          onChange={setInterval}
-        />
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <ButtonItem>
+      <div style={styles.submitButtonContainer}>
+        <ButtonItem 
+          bottomSeparator="none"
+          highlightOnFocus={false}
+        >
           Save Settings
         </ButtonItem>
-      </PanelSectionRow>
-    </PanelSection>
-
-      {/* <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow> */}
+      </div>
     </>
   );
 };
@@ -145,14 +86,12 @@ export default definePlugin(() => {
   });
 
   return {
-    // The name shown in various decky menus
-    name: "Test Plugin",
-    // The element displayed at the top of your plugin's menu
-    titleView: <div className={staticClasses.Title}>Decky Example Plugin</div>,
+    name: "MQTT Battery Plugin",
+    titleView: <div className={staticClasses.Title}>MQTT Battery Plugin</div>,
     // The content of your plugin's menu
     content: <Content />,
     // The icon displayed in the plugin list
-    icon: <FaShip />,
+    icon: <FaBroadcastTower />,
     // The function triggered when your plugin unloads
     onDismount() {
       console.log("Unloading")
